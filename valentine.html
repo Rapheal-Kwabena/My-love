@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Be My Valentine 💖</title>
+
+  <!-- Preload critical resources -->
+  <link rel="preload" as="audio" href="audio/Still think of you.mp3" />
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb);
+      background-size: 400% 400%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      position: relative;
+      will-change: auto;
+      contain: layout style paint;
+    }
+
+    body.loaded {
+      animation: gradientShift 15s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    /* Floating hearts background */
+    .bg-heart {
+      position: fixed;
+      font-size: 20px;
+      opacity: 0.15;
+      pointer-events: none;
+      will-change: transform, opacity;
+      content-visibility: auto;
+    }
+
+    .bg-heart.animated {
+      animation: floatBg 20s linear infinite;
+    }
+
+    @keyframes floatBg {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.15;
+      }
+
+      90% {
+        opacity: 0.15;
+      }
+
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .container {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 50px 40px;
+      border-radius: 30px;
+      box-shadow: 0 25px 50px rgba(255, 77, 109, 0.3);
+      max-width: 450px;
+      width: 90%;
+      backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 10;
+    }
+
+    h1 {
+      color: #ff4d6d;
+      margin-bottom: 35px;
+      font-size: 2em;
+      text-shadow: 2px 2px 4px rgba(255, 77, 109, 0.2);
+      will-change: transform;
+      contain: layout style paint;
+    }
+
+    h1.loaded {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    .button-container {
+      position: relative;
+      min-height: 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 18px 35px;
+      font-size: 20px;
+      font-weight: 600;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #yesBtn {
+      background: linear-gradient(135deg, #ff4d6d, #ff6b9d);
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #yesBtn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    #yesBtn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    #yesBtn:hover {
+      transform: scale(1.15);
+      box-shadow: 0 10px 25px rgba(255, 77, 109, 0.4);
+    }
+
+    #yesBtn span {
+      position: relative;
+      z-index: 1;
+    }
+
+    #noBtn {
+      background: #f0f0f0;
+      color: #666;
+      position: relative;
+      transition: all 0.3s ease;
+      z-index: 50;
+    }
+
+    #noBtn.moving {
+      position: fixed;
+      z-index: 50;
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: block !important;
+    }
+
+    #noBtn:hover {
+      background: #e0e0e0;
+      transform: scale(0.95);
+    }
+
+    /* Storybook Styles */
+    .storybook-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+      perspective: 2000px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .storybook-container.active {
+      display: flex;
+    }
+
+    .book {
+      position: relative;
+      width: 90%;
+      max-width: 800px;
+      height: 85vh;
+      max-height: 600px;
+      transform-style: preserve-3d;
+    }
+
+    .page {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      padding: 50px 40px;
+      overflow-y: auto;
+      backface-visibility: hidden;
+      transform-origin: left center;
+      transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1);
+    }
+
+    .page.flipped {
+      transform: rotateY(-180deg);
+    }
+
+    .page.hidden {
+      display: none;
+    }
+
+    .page-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .page h2 {
+      color: #ff4d6d;
+      font-size: 2em;
+      margin-bottom: 25px;
+      text-align: center;
+      animation: heartBeat 1.5s ease-in-out infinite;
+    }
+
+    @keyframes heartBeat {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      10%,
+      30% {
+        transform: scale(1.1);
+      }
+
+      20%,
+      40% {
+        transform: scale(1);
+      }
+    }
+
+    .page h3 {
+      color: #ff4d6d;
+      font-size: 1.5em;
+      margin: 20px 0 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .page p {
+      font-size: 1.1em;
+      line-height: 1.8;
+      color: #555;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .page-number {
+      position: absolute;
+      bottom: 20px;
+      right: 30px;
+      color: #ff4d6d;
+      font-size: 0.9em;
+      font-style: italic;
+    }
+
+    .precious {
+      color: #ff4d6d;
+      font-weight: bold;
+      font-size: 1.1em;
+      text-shadow: 2px 2px 4px rgba(255, 77, 109, 0.3);
+      background: linear-gradient(135deg, #ff4d6d, #ff6b9d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+      display: inline-block;
+      animation: glow 2s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+
+      0%,
+      100% {
+        filter: drop-shadow(0 0 5px rgba(255, 77, 109, 0.5));
+      }
+
+      50% {
+        filter: drop-shadow(0 0 15px rgba(255, 77, 109, 0.8));
+      }
+    }
+
+    .highlight-box {
+      margin: 25px 0;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(255, 77, 109, 0.1), rgba(255, 107, 157, 0.1));
+      border-radius: 15px;
+      border-left: 4px solid #ff4d6d;
+    }
+
+    .signature {
+      margin-top: 30px;
+      font-style: italic;
+      color: #ff4d6d;
+      font-size: 1.1em;
+      text-align: center;
+    }
+
+    /* Navigation Controls */
+    .nav-controls {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+      z-index: 101;
+    }
+
+    .nav-btn {
+      background: linear-gradient(135deg, #ff4d6d, #ff6b9d);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 1.1em;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(255, 77, 109, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(255, 77, 109, 0.5);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .page-indicator {
+      position: fixed;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 1em;
+      background: rgba(255, 77, 109, 0.8);
+      padding: 10px 25px;
+      border-radius: 25px;
+      z-index: 101;
+      backdrop-filter: blur(10px);
+    }
+
+    /* Custom scrollbar for pages */
+    .page::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .page::-webkit-scrollbar-track {
+      background: rgba(255, 77, 109, 0.1);
+      border-radius: 10px;
+    }
+
+    .page::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #ff4d6d, #ff6b9d);
+      border-radius: 10px;
+    }
+
+    /* Splash screen */
+    .splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #ff4d6d, #ff6b9d, #fbc2eb);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 2000;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    .splash-screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .splash-message {
+      font-size: 3.5em;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+      text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      animation: heartBeatSplash 1.5s ease-in-out infinite;
+      margin-bottom: 30px;
+    }
+
+    @keyframes heartBeatSplash {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      10%,
+      30% {
+        transform: scale(1.1);
+      }
+
+      20%,
+      40% {
+        transform: scale(1);
+      }
+    }
+
+    .splash-timer {
+      font-size: 5em;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      animation: timerPulse 1s ease-in-out infinite;
+    }
+
+    @keyframes timerPulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+      }
+    }
+
+    /* Celebration animations */
+    .heart {
+      position: fixed;
+      font-size: 24px;
+      pointer-events: none;
+      z-index: 1000;
+      animation: floatUp 6s linear;
+      will-change: transform, opacity;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-120vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+      z-index: 999;
+      animation: confettiFall 3s linear;
+      will-change: transform, opacity;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    .firework {
+      position: fixed;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 999;
+      animation: fireworkExplode 1s ease-out;
+      will-change: transform, opacity;
+    }
+
+    @keyframes fireworkExplode {
+      0% {
+        transform: translate(0, 0);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(var(--fx), var(--fy));
+        opacity: 0;
+      }
+    }
+
+    .celebration-text {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 4em;
+      font-weight: bold;
+      color: #ff4d6d;
+      text-shadow: 0 0 20px rgba(255, 77, 109, 0.8);
+      pointer-events: none;
+      z-index: 1001;
+      animation: celebrationPop 2s ease-out;
+    }
+
+    @keyframes celebrationPop {
+      0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+      }
+
+      50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5em;
+      }
+
+      button {
+        font-size: 16px;
+        padding: 15px 30px;
+      }
+
+      .page {
+        padding: 30px 25px;
+      }
+
+      .page h2 {
+        font-size: 1.6em;
+      }
+
+      .page h3 {
+        font-size: 1.3em;
+      }
+
+      .page p {
+        font-size: 1em;
+      }
+
+      .splash-message {
+        font-size: 2.5em;
+        padding: 0 20px;
+      }
+
+      .splash-timer {
+        font-size: 4em;
+      }
+
+      .nav-btn {
+        padding: 12px 25px;
+        font-size: 1em;
+      }
+
+      .book {
+        height: 80vh;
+      }
+    }
+
+    * {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    .page p,
+    .page h2,
+    .page h3 {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Background floating hearts -->
+  <script>
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        for (let i = 0; i < 15; i++) {
+          const heart = document.createElement('div');
+          heart.classList.add('bg-heart');
+          heart.innerText = '💖';
+          heart.style.left = Math.random() * 100 + 'vw';
+          heart.style.animationDelay = Math.random() * 20 + 's';
+          heart.style.fontSize = (Math.random() * 30 + 20) + 'px';
+          document.body.appendChild(heart);
+          setTimeout(() => heart.classList.add('animated'), 50);
+        }
+      }, 100);
+
+      document.body.classList.add('loaded');
+      document.querySelector('h1')?.classList.add('loaded');
+    });
+  </script>
+
+  <!-- Background Music -->
+  <audio id="bgMusic" loop preload="none" playsinline>
+    <source src="audio/Still think of you.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Splash Screen -->
+  <div class="splash-screen" id="splashScreen">
+    <div class="splash-message">Wirekoa I love you 💕</div>
+    <div class="splash-timer" id="splashTimer">3</div>
+  </div>
+
+  <!-- Question Box -->
+  <div class="container" id="questionBox">
+    <h1>Will you be my Valentine? 💖</h1>
+    <div class="button-container">
+      <button id="yesBtn"><span>Yes 💕</span></button>
+      <button id="noBtn">No 😅</button>
+    </div>
+  </div>
+
+  <!-- Storybook -->
+  <div class="storybook-container" id="storybookContainer">
+    <div class="page-indicator" id="pageIndicator">Page 1 of 8</div>
+
+    <div class="book" id="book">
+      <!-- Page 1: Cover -->
+      <div class="page" data-page="1">
+        <div class="page-content">
+          <h2>📖 Our Love Story 📖</h2>
+          <div class="highlight-box" style="text-align: center; margin-top: 50px;">
+            <p style="font-size: 1.5em; color: #ff4d6d; font-weight: bold;">
+              The Story of Us
+            </p>
+            <p style="font-size: 1.2em; margin-top: 20px;">
+              From a UNO game to forever...
+            </p>
+            <p style="font-size: 1em; margin-top: 30px; color: #888;">
+              ✨ Kwabena & <span class="precious">Wirekoa</span> ✨
+            </p>
+          </div>
+        </div>
+        <div class="page-number">1</div>
+      </div>
+
+      <!-- Page 2: Sunday Evening - The UNO Game -->
+      <div class="page hidden" data-page="2">
+        <div class="page-content">
+          <h3>✨ Chapter 1: The UNO Game</h3>
+          <p style="font-style: italic; color: #888; margin-bottom: 20px;">Sunday Evening</p>
+
+          <p>
+            It was a Sunday evening, and everyone was gathered around playing UNO.
+            The room was filled with laughter and friendly competition, but honestly,
+            I wasn't really feeling it that night.
+          </p>
+          <p>
+            I didn't want to vibe with anyone at that time because the energy just
+            wasn't right for me. So I kept to myself, playing the game but not really
+            connecting with anyone.
+          </p>
+          <p>
+            Little did I know, you were there too, <span class="precious">Precious</span>.
+            But in that moment, I didn't notice you yet. The universe was just setting
+            the stage for what was about to come...
+          </p>
+        </div>
+        <div class="page-number">2</div>
+      </div>
+
+      <!-- Page 3: Monday Morning - The Moment -->
+      <div class="page hidden" data-page="3">
+        <div class="page-content">
+          <h3>💕 Chapter 2: "I'll Make Sure You Don't Leave First"</h3>
+          <p style="font-style: italic; color: #888; margin-bottom: 20px;">Monday Morning</p>
+
+          <p>
+            Monday morning came, and we continued playing UNO. That's when everything changed.
+          </p>
+          <div class="highlight-box">
+            <p style="font-size: 1.2em; text-align: center; color: #ff4d6d;">
+              You came and stood right between me and my brother...
+            </p>
+          </div>
+          <p>
+            And then you said it: <strong>"You! I will make sure you don't leave first."</strong>
+          </p>
+          <p>
+            I smiled. I laughed. In that moment, something shifted. You had my attention now.
+            There was something about your confidence, your playful energy, the way you just
+            inserted yourself into my world without hesitation.
+          </p>
+          <p>
+            That was the moment I truly <em>noticed</em> you, <span class="precious">Wirekoa</span>.
+          </p>
+        </div>
+        <div class="page-number">3</div>
+      </div>
+
+      <!-- Page 4: Monday Evening - Walking Alone -->
+      <div class="page hidden" data-page="4">
+        <div class="page-content">
+          <h3>🌟 Chapter 3: Walking Alone</h3>
+          <p style="font-style: italic; color: #888; margin-bottom: 20px;">Monday Evening</p>
+
+          <p>
+            That evening, everyone was walking in pairs. Couples, friends, groups—everyone
+            had someone. But you? You were walking alone.
+          </p>
+          <p>
+            I remember thinking to myself: <em>"Wait, doesn't she have friends? Or is she
+              just vibing by herself?"</em> There was something intriguing about that. You seemed
+            so comfortable in your own company, so independent.
+          </p>
+          <p>
+            I couldn't just let you walk alone. Something pulled me toward you. So I came closer.
+          </p>
+          <p>
+            I asked for your name because, honestly, I didn't even know it back then.
+            That simple question opened the door to everything that would come after.
+          </p>
+        </div>
+        <div class="page-number">4</div>
+      </div>
+
+      <!-- Page 5: Getting to Know You -->
+      <div class="page hidden" data-page="5">
+        <div class="page-content">
+          <h3>❤️ Chapter 4: Getting to Know You</h3>
+
+          <p>
+            After I got to know your name, I wanted to know more. But I was scared,
+            <span class="precious">Precious</span>. I was so afraid to get attached.
+          </p>
+          <p>
+            I didn't know if you had a boyfriend or not, and I didn't want to catch
+            feelings for someone who was already taken. So I did what any curious person
+            would do—I made enquiries. 😅
+          </p>
+          <div class="highlight-box">
+            <p style="text-align: center; font-size: 1.2em; color: #ff4d6d;">
+              And when I found out you didn't have a boyfriend...
+            </p>
+            <p style="text-align: center; font-size: 1.3em; margin-top: 10px;">
+              I saw an opening. ✨
+            </p>
+          </div>
+          <p>
+            From that moment, I knew I had to take my shot. You were special, and I
+            wasn't going to let this chance slip away.
+          </p>
+        </div>
+        <div class="page-number">5</div>
+      </div>
+
+      <!-- Page 6: Through the Ups and Downs -->
+      <div class="page hidden" data-page="6">
+        <div class="page-content">
+          <h3>💔 Chapter 5: Through the Ups and Downs</h3>
+
+          <p>
+            I won't lie to you, <span class="precious">Wirekoa</span>. Our journey hasn't
+            always been smooth. We've fought multiple times. I've felt hurt, and I know
+            I've hurt your feelings too.
+          </p>
+          <p>
+            I'm sorry for all the pain I've caused you. I really am. You need to know that
+            I love you too much, and sometimes that love makes me afraid of losing you,
+            which makes me act in ways I'm not proud of.
+          </p>
+          <p>
+            Sometimes I get pissed at things you do, and I don't tell you because I don't
+            want it to escalate. I bottle it up, thinking I'm protecting us, but I know
+            that's not always the right way to handle things.
+          </p>
+          <p>
+            But through it all—through every argument, every misunderstanding, every moment
+            of frustration—my love for you has never wavered. If anything, it's grown stronger.
+          </p>
+        </div>
+        <div class="page-number">6</div>
+      </div>
+
+      <!-- Page 7: Today and Forever -->
+      <div class="page hidden" data-page="7">
+        <div class="page-content">
+          <h3>💖 Chapter 6: Today and Forever</h3>
+
+          <p>
+            Today, as I write this, I want you to know something important:
+            <strong>You will forever remain in my heart.</strong>
+          </p>
+          <p>
+            You're not just my girlfriend, <span class="precious">Precious</span>. You're my
+            best friend, my confidant, my safe place. You're the person I think about when
+            I wake up and the last person on my mind before I sleep.
+          </p>
+          <div class="highlight-box">
+            <p style="font-size: 1.3em; color: #ff4d6d; font-weight: bold; text-align: center; margin-bottom: 10px;">
+              I still think of you... every single day. 💭
+            </p>
+            <p style="font-size: 1.1em; text-align: center;">
+              And I always will. ✨
+            </p>
+          </div>
+          <p>
+            I promise to work on being better—to communicate more, to love you harder,
+            to cherish every moment we have together. You deserve the world, and I want
+            to be the one to give it to you.
+          </p>
+        </div>
+        <div class="page-number">7</div>
+      </div>
+
+      <!-- Page 8: Final Page -->
+      <div class="page hidden" data-page="8">
+        <div class="page-content">
+          <div
+            style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center;">
+            <h2 style="font-size: 2.5em; margin-bottom: 30px;">I Love You So Much 💕</h2>
+
+            <p style="font-size: 1.3em; line-height: 2; margin-bottom: 40px;">
+              Thank you for being you.<br>
+              Thank you for choosing me.<br>
+              Thank you for loving me.<br>
+            </p>
+
+            <div class="highlight-box" style="margin: 30px 0;">
+              <p style="font-size: 1.5em; color: #ff4d6d; font-weight: bold;">
+                <span class="precious">Wirekoa</span>, you are my forever.
+              </p>
+            </div>
+
+            <p class="signature" style="margin-top: 50px;">
+              Happy Valentine's Day, my love ❤️<br>
+              <strong>- Kwabena</strong>
+            </p>
+          </div>
+        </div>
+        <div class="page-number">8</div>
+      </div>
+    </div>
+
+    <!-- Navigation Controls -->
+    <div class="nav-controls">
+      <button class="nav-btn" id="prevBtn" disabled>← Previous</button>
+      <button class="nav-btn" id="nextBtn">Next →</button>
+    </div>
+  </div>
+
+  <script>
+    const noBtn = document.getElementById("noBtn");
+    const yesBtn = document.getElementById("yesBtn");
+    const questionBox = document.getElementById("questionBox");
+    const storybookContainer = document.getElementById("storybookContainer");
+    const bgMusic = document.getElementById("bgMusic");
+    const splashScreen = document.getElementById('splashScreen');
+    const splashTimer = document.getElementById('splashTimer');
+
+    let clickCount = 0;
+    let musicPlaying = false;
+    let currentPage = 1;
+    const totalPages = 8;
+
+    const noBtnTexts = [
+      "No 😅",
+      "Are you sure? 🤔",
+      "Really? 😢",
+      "Think again... 💭",
+      "Pretty please? 🥺",
+      "Just click Yes! 😌",
+      "You know you want to 😏",
+      "Last chance! 💖"
+    ];
+
+    // Music functions
+    function tryPlayMusic() {
+      if (!musicPlaying) {
+        bgMusic.play().then(() => {
+          musicPlaying = true;
+          console.log('Music playing');
+        }).catch(() => {
+          musicPlaying = false;
+          console.log('Music autoplay blocked - will play on interaction');
+        });
+      }
+    }
+
+    window.addEventListener('load', () => {
+      tryPlayMusic();
+    });
+
+    document.addEventListener('click', tryPlayMusic, { once: true });
+    document.addEventListener('touchstart', tryPlayMusic, { once: true });
+
+    // Move "No" button
+    const moveNoButton = () => {
+      tryPlayMusic();
+      noBtn.classList.add('moving');
+
+      // Ensure button stays on screen with padding
+      const buttonWidth = 150;
+      const buttonHeight = 60;
+      const padding = 20;
+
+      const maxX = window.innerWidth - buttonWidth - padding;
+      const maxY = window.innerHeight - buttonHeight - padding;
+      const x = Math.max(padding, Math.random() * maxX);
+      const y = Math.max(padding, Math.random() * maxY);
+
+      noBtn.style.left = `${x}px`;
+      noBtn.style.top = `${y}px`;
+      noBtn.style.visibility = 'visible';
+      noBtn.style.opacity = '1';
+      noBtn.style.display = 'block';
+
+      clickCount++;
+      if (clickCount < noBtnTexts.length) {
+        noBtn.innerText = noBtnTexts[clickCount];
+      }
+
+      const currentScale = 1 + (clickCount * 0.1);
+      yesBtn.style.transform = `scale(${Math.min(currentScale, 1.5)})`;
+    };
+
+    // Only move on hover, not on click - makes it challenging but possible to click
+    noBtn.addEventListener("mouseover", moveNoButton);
+
+    // On mobile, move when touch starts (before they can tap)
+    noBtn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      moveNoButton();
+    });
+
+    // Yes button click
+    yesBtn.addEventListener("click", () => {
+      tryPlayMusic();
+      createSparkles(yesBtn);
+      createConfetti();
+      createFireworks();
+      showCelebrationText();
+
+      setTimeout(() => {
+        questionBox.style.display = "none";
+        splashScreen.classList.add('active');
+
+        let timeLeft = 3;
+        splashTimer.innerText = timeLeft;
+
+        const countdown = setInterval(() => {
+          timeLeft--;
+          if (timeLeft > 0) {
+            splashTimer.innerText = timeLeft;
+          } else {
+            clearInterval(countdown);
+            splashScreen.classList.remove('active');
+            storybookContainer.classList.add('active');
+            startHeartRain();
+          }
+        }, 1000);
+      }, 300);
+    });
+
+    yesBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      yesBtn.click();
+    });
+
+    [yesBtn, noBtn].forEach(btn => {
+      btn.addEventListener('touchstart', () => {
+        tryPlayMusic();
+      });
+    });
+
+    // Storybook navigation
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pageIndicator = document.getElementById('pageIndicator');
+    const pages = document.querySelectorAll('.page');
+
+    function updatePage() {
+      pages.forEach((page, index) => {
+        const pageNum = index + 1;
+        if (pageNum < currentPage) {
+          page.classList.add('flipped');
+          page.classList.remove('hidden');
+        } else if (pageNum === currentPage) {
+          page.classList.remove('flipped', 'hidden');
+        } else {
+          page.classList.add('hidden');
+          page.classList.remove('flipped');
+        }
+      });
+
+      pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage === totalPages;
+
+      // Scroll to top of current page
+      const currentPageEl = document.querySelector(`[data-page="${currentPage}"]`);
+      if (currentPageEl) {
+        currentPageEl.scrollTop = 0;
+      }
+    }
+
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        updatePage();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        updatePage();
+      }
+    });
+
+    // Celebration effects
+    function createSparkles(element) {
+      const rect = element.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      for (let i = 0; i < 20; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.style.position = 'fixed';
+        sparkle.style.width = '4px';
+        sparkle.style.height = '4px';
+        sparkle.style.background = 'white';
+        sparkle.style.borderRadius = '50%';
+        sparkle.style.pointerEvents = 'none';
+        sparkle.style.zIndex = '999';
+
+        const tx = (Math.random() - 0.5) * 200;
+        const ty = (Math.random() - 0.5) * 200;
+        sparkle.style.left = centerX + 'px';
+        sparkle.style.top = centerY + 'px';
+
+        document.body.appendChild(sparkle);
+
+        sparkle.animate([
+          { transform: 'scale(0)', opacity: 1 },
+          { transform: `scale(1) translate(${tx}px, ${ty}px)`, opacity: 0 }
+        ], {
+          duration: 1500,
+          easing: 'ease-out'
+        });
+
+        setTimeout(() => sparkle.remove(), 1500);
+      }
+    }
+
+    function createConfetti() {
+      const colors = ['#ff4d6d', '#ff6b9d', '#ffd700', '#ff1493', '#ff69b4', '#ff8c00'];
+
+      for (let i = 0; i < 100; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.classList.add('confetti');
+          confetti.style.left = Math.random() * 100 + 'vw';
+          confetti.style.top = '-10px';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+          confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+          document.body.appendChild(confetti);
+
+          setTimeout(() => confetti.remove(), 3500);
+        }, i * 30);
+      }
+    }
+
+    function createFireworks() {
+      const colors = ['#ff4d6d', '#ff6b9d', '#ffd700', '#ff1493', '#ff69b4'];
+
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          const x = Math.random() * window.innerWidth;
+          const y = Math.random() * window.innerHeight * 0.5;
+
+          for (let j = 0; j < 30; j++) {
+            const firework = document.createElement('div');
+            firework.classList.add('firework');
+            const angle = (Math.PI * 2 * j) / 30;
+            const velocity = 100 + Math.random() * 100;
+            const fx = Math.cos(angle) * velocity;
+            const fy = Math.sin(angle) * velocity;
+
+            firework.style.left = x + 'px';
+            firework.style.top = y + 'px';
+            firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            firework.style.setProperty('--fx', fx + 'px');
+            firework.style.setProperty('--fy', fy + 'px');
+
+            document.body.appendChild(firework);
+            setTimeout(() => firework.remove(), 1000);
+          }
+        }, i * 400);
+      }
+    }
+
+    function showCelebrationText() {
+      const texts = ['🎉', '💕', '❤️', '✨'];
+
+      texts.forEach((text, index) => {
+        setTimeout(() => {
+          const celebText = document.createElement('div');
+          celebText.classList.add('celebration-text');
+          celebText.innerText = text;
+          document.body.appendChild(celebText);
+
+          setTimeout(() => celebText.remove(), 2000);
+        }, index * 500);
+      });
+    }
+
+    function startHeartRain() {
+      const heartEmojis = ['💖', '💕', '💗', '💘', '❤️', '💝'];
+
+      setInterval(() => {
+        const heart = document.createElement("div");
+        heart.classList.add("heart");
+        heart.innerText = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.fontSize = Math.random() * 25 + 20 + "px";
+        heart.style.animationDuration = (Math.random() * 3 + 4) + "s";
+        document.body.appendChild(heart);
+
+        setTimeout(() => heart.remove(), 6000);
+      }, 200);
+    }
+  </script>
+</body>
+
+</html>
